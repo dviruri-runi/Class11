@@ -1,13 +1,23 @@
 package il.co.dmobile.myapplication_2;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
 public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
+    List<User> Users;
+    public UserAdapter(List<User> users) {
+        Users = users;
+    }
+
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -18,13 +28,27 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        holder.avatar.setImageResource(R.drawable.logo);
-        holder.name.setText("Conact 1");
-        holder.email.setText("contact1@post.runi.ac.il");
+        User user = Users.get(position);
+        holder.avatar.setImageResource(user.getImage());
+        holder.name.setText(user.getName());
+        holder.email.setText(user.getEmail());
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(),MainActivity2.class);
+                intent.putExtra("User",user);
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        (Activity) view.getContext(),
+                        holder.avatar,
+                        "AvatarTransition"
+                );
+                view.getContext().startActivity(intent,options.toBundle());
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return 8;
+        return Users.size();
     }
 }

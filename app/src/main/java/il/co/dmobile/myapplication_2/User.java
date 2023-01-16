@@ -1,6 +1,8 @@
 package il.co.dmobile.myapplication_2;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
 
     private int Image;
     private String Name;
