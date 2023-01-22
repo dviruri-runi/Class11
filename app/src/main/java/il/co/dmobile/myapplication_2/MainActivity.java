@@ -1,31 +1,47 @@
 package il.co.dmobile.myapplication_2;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    //State
+    UserAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        List<User> users = new ArrayList<>();
-        users.add(new User(R.drawable.avatar1,"Contact 1","contact1@post.runi.ac.il"));
-        users.add(new User(R.drawable.avatar2,"Contact 2","contact2@post.runi.ac.il"));
-        users.add(new User(R.drawable.avatar3,"Contact 3","contact3@post.runi.ac.il"));
-        users.add(new User(R.drawable.avatar4,"Contact 4","contact4@post.runi.ac.il"));
-        users.add(new User(R.drawable.avatar5,"Contact 5","contact5@post.runi.ac.il"));
-        users.add(new User(R.drawable.avatar6,"Contact 6","contact6@post.runi.ac.il"));
-        users.add(new User(R.drawable.avatar7,"Contact 7","contact7@post.runi.ac.il"));
-        users.add(new User(R.drawable.avatar8,"Contact 8","contact8@post.runi.ac.il"));
+        ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        Intent data = result.getData();
+                        newContactResult(data);
+                    }
+                }
+        );
+        DataPersistencyHelper.context = getApplicationContext();
+        List<User> users = DataPersistencyHelper.loadData();
 
         RecyclerView recyclerView = findViewById(R.id.rv);
         recyclerView.setHasFixedSize(false);
@@ -33,9 +49,29 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(layoutManager);
 
-        UserAdapter adapter = new UserAdapter(users);
+
+
+        adapter = new UserAdapter(users);
         recyclerView.setAdapter(adapter);
+        ItemTouchHelper helper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter));
+        helper.attachToRecyclerView(recyclerView);
 
 
+        FloatingActionButton fab = findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(),NewContactActivity.class);
+                activityResultLauncher.launch(intent);
+            }
+        });
+
+
+    }
+
+    private void newContactResult(Intent data) {
+        Bundle b = data.getExtras();
+        User user = (User)b.getSerializable("user");
+        adapter.addUser(user);
     }
 }

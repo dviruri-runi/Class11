@@ -18,6 +18,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
         Users = users;
     }
 
+    public void addUser(User user) {
+        Users.add(user);
+        notifyDataSetChanged();
+        DataPersistencyHelper.storeData(Users);
+    }
+
+    public void deleteUser(int position) {
+        Users.remove(position);
+        notifyDataSetChanged();
+        DataPersistencyHelper.storeData(Users);
+    }
+
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
